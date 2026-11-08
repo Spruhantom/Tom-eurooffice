@@ -67,7 +67,7 @@ install_server() {
     esac
   fi
   install -d -m 0750 "$CONFIG_DIR"
-  install -d -m 0750 "$DATA_DIR/documentserver" "$DATA_DIR/private" "$DATA_DIR/logs/adminpanel"
+  install -d -m 0750 "$DATA_DIR/documentserver" "$DATA_DIR/private" "$DATA_DIR/logs/adminpanel" "$DATA_DIR/logs/converter"
   local secret
   if [[ -s "$ENV_FILE" ]] && grep -q '^JWT_SECRET=' "$ENV_FILE"; then
     secret="$(sed -n 's/^JWT_SECRET=//p' "$ENV_FILE" | head -n1)"
