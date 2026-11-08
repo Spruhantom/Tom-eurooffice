@@ -42,7 +42,7 @@ Or use the helper:
 sudo bash uninstall.sh
 ```
 
-To also delete the stored JWT secret and configuration:
+To also delete the stored JWT secret, configuration and persistent server data:
 
 ```bash
 sudo bash install.sh --uninstall --purge
@@ -53,6 +53,9 @@ Docker is intentionally left installed because other containers may depend on it
 ## Paths and security
 
 - Configuration and JWT secret: `/etc/euro-office/server.env` (root-only permissions)
+- Persistent document-server state: `/var/lib/euro-office/documentserver`
+- Runtime settings and generated keys: `/var/lib/euro-office/private`
+- Document-server logs: `/var/lib/euro-office/logs`
 - Installer log: `/var/log/euro-office/installer.log`
 - Container: `euro-office-documentserver`
 - Default local endpoint: `http://127.0.0.1:8080`
