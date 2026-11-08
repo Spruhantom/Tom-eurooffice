@@ -96,8 +96,9 @@ This is an independent community installer and is not affiliated with or endorse
 
 This repository also provides a helper for configuring the community Euro-Office
 integration with the upstream OpenCloud Compose project. It selects the
-upstream WOPI/app-provider Compose modules, generates strong secrets and
-validates the Compose configuration.
+upstream Yjs, WOPI and app-provider Compose modules, generates strong secrets
+and validates the Compose configuration. A live smoke test and a manual
+browser edit/save/reopen acceptance checklist are also provided.
 
 See [OpenCloud + Euro-Office integration](docs/opencloud-integration.md) for
 setup instructions, proxy requirements and support-status warnings.
