@@ -118,7 +118,7 @@ install_server() {
       printf 'Local URL: http://127.0.0.1:%s\n' "$port"
       printf 'Container: %s\nJWT secret file: %s\nLog: %s\n' "$CONTAINER" "$ENV_FILE" "$LOG_FILE"
       printf '\nThe service is bound to localhost only. Put it behind an HTTPS reverse proxy before remote use.\n'
-      printf 'Integrate it with a compatible platform such as Nextcloud; it is not standalone file storage.\n'
+      printf 'Integrate it with a compatible platform such as OpenCloud; it is not standalone file storage.\n'
       printf 'Review upstream documentation and community-build support status before production use.\n'
       return 0
     fi
