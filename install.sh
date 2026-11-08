@@ -88,7 +88,7 @@ install_server() {
   log "Starting Document Server on TCP port $port."
   local volume_suffix=""
   # SELinux hosts need private relabelling for writable bind mounts.
-  [[ "$DISTRO" == fedora ]] && volume_suffix=":Z"
+  if [[ "$DISTRO" == fedora ]]; then volume_suffix=":Z"; fi
   docker run -d --name "$CONTAINER" --restart unless-stopped \
     --publish "127.0.0.1:$port:80" \
     --env JWT_ENABLED=true --env "JWT_SECRET=$secret" \
