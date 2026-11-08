@@ -20,6 +20,6 @@ jobs:
       - name: Bash syntax
         run: bash -n install.sh uninstall.sh tests/container-smoke.sh scripts/configure-opencloud.sh tests/opencloud-config.sh tests/opencloud-live-smoke.sh
       - name: ShellCheck
-        run: shellcheck --severity=warning install.sh uninstall.sh tests/container-smoke.sh scripts/configure-opencloud.sh tests/opencloud-config.sh
+        run: shellcheck --severity=warning install.sh uninstall.sh tests/container-smoke.sh scripts/configure-opencloud.sh tests/opencloud-config.sh tests/opencloud-live-smoke.sh
       - name: OpenCloud integration configuration test
         run: bash tests/opencloud-config.sh
