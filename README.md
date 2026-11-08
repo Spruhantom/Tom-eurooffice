@@ -91,3 +91,28 @@ GitHub Actions runs Bash syntax checks and ShellCheck on pushes and pull request
 - [Official documentation](https://euro-office.github.io/documentation/)
 
 This is an independent community installer and is not affiliated with or endorsed by Euro-Office contributors.
+
+## OpenCloud integration
+
+This repository also provides a helper for configuring the community Euro-Office
+integration with the upstream OpenCloud Compose project. It selects the
+upstream WOPI/app-provider Compose modules, generates strong secrets and
+validates the Compose configuration.
+
+See [OpenCloud + Euro-Office integration](docs/opencloud-integration.md) for
+setup instructions, proxy requirements and support-status warnings.
+
+Quick configuration example:
+
+```bash
+git clone https://github.com/opencloud-eu/opencloud-compose.git
+bash scripts/configure-opencloud.sh \
+  --compose-dir ./opencloud-compose \
+  --opencloud-domain cloud.example.com \
+  --office-domain office.example.com \
+  --proxy external-proxy
+```
+
+This helper configures the upstream deployment; it does not replace OpenCloud's
+collaboration/WOPI service. Euro-Office and Collabora must not be enabled
+together.
