@@ -32,4 +32,12 @@ grep -Fxq 'EURO_OFFICE_DOMAIN=office.example.test' "$TMP/compose/.env"
 grep -Eq '^EURO_OFFICE_JWT_SECRET=[a-f0-9]{64}$' "$TMP/compose/.env"
 grep -Eq '^INITIAL_ADMIN_PASSWORD=[a-f0-9]{48}$' "$TMP/compose/.env"
 [[ "$(stat -c '%a' "$TMP/compose/.env")" == 600 ]]
+jwt_before="$(sed -n 's/^EURO_OFFICE_JWT_SECRET=//p' "$TMP/compose/.env")"
+admin_before="$(sed -n 's/^INITIAL_ADMIN_PASSWORD=//p' "$TMP/compose/.env")"
+PATH="$TMP/bin:$PATH" bash "$SCRIPT" \
+  --compose-dir "$TMP/compose" \
+  --opencloud-domain cloud.example.test \
+  --office-domain office.example.test
+[[ "$(sed -n 's/^EURO_OFFICE_JWT_SECRET=//p' "$TMP/compose/.env")" == "$jwt_before" ]]
+[[ "$(sed -n 's/^INITIAL_ADMIN_PASSWORD=//p' "$TMP/compose/.env")" == "$admin_before" ]]
 echo "OpenCloud configuration test passed."
