@@ -10,11 +10,11 @@ PORT=""
 
 cleanup() {
   docker rm -f "$CONTAINER" >/dev/null 2>&1 || true
-  rm -rf -- "$WORK_DIR"
+  sudo rm -rf -- "$WORK_DIR"
 }
 trap cleanup EXIT
 
-mkdir -p "$WORK_DIR/documentserver" "$WORK_DIR/private" "$WORK_DIR/logs"
+mkdir -p "$WORK_DIR/documentserver" "$WORK_DIR/private" "$WORK_DIR/logs/adminpanel"
 echo "smoke-test-persistent-state" > "$WORK_DIR/documentserver/persistence-marker"
 echo "smoke-test-private-state" > "$WORK_DIR/private/persistence-marker"
 echo "smoke-test-log-state" > "$WORK_DIR/logs/persistence-marker"
@@ -55,7 +55,7 @@ done
 
 docker rm -f "$CONTAINER" >/dev/null
 for marker in "$WORK_DIR/documentserver/persistence-marker" "$WORK_DIR/private/persistence-marker" "$WORK_DIR/logs/persistence-marker"; do
-  [[ -s "$marker" ]] || { echo "Persistent data missing: $marker" >&2; exit 1; }
+  sudo test -s "$marker" || { echo "Persistent data missing: $marker" >&2; exit 1; }
 done
 
 echo "Container runtime smoke test passed."
