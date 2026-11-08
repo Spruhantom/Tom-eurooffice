@@ -13,10 +13,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Install ShellCheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes shellcheck
       - name: Bash syntax
         run: bash -n install.sh uninstall.sh
       - name: ShellCheck
-        uses: ludeeus/action-shellcheck@master
-        with:
-          scandir: .
-          severity: warning
+        run: shellcheck --severity=warning install.sh uninstall.sh
