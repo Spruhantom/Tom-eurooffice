@@ -67,7 +67,9 @@ install_server() {
     esac
   fi
   install -d -m 0750 "$CONFIG_DIR"
-  install -d -m 0750 "$DATA_DIR/documentserver" "$DATA_DIR/private" "$DATA_DIR/logs/adminpanel" "$DATA_DIR/logs/converter"
+  install -d -m 0750 "$DATA_DIR/documentserver" "$DATA_DIR/private" \
+    "$DATA_DIR/logs/adminpanel" "$DATA_DIR/logs/converter" \
+    "$DATA_DIR/logs/docservice" "$DATA_DIR/logs/metrics" "$DATA_DIR/logs/converter"
   local secret
   if [[ -s "$ENV_FILE" ]] && grep -q '^JWT_SECRET=' "$ENV_FILE"; then
     secret="$(sed -n 's/^JWT_SECRET=//p' "$ENV_FILE" | head -n1)"
@@ -83,10 +85,14 @@ install_server() {
   docker pull "$IMAGE"
   log "Preparing log directories required by the image Supervisor configuration."
   local log_paths
-  log_paths="$(docker run --rm --entrypoint /bin/bash "$IMAGE" -lc "grep -RhoE '/var/log/euro-office/documentserver/[^[:space:]]+' /etc/supervisor/conf.d 2>/dev/null || true")"
+  # Supervisor config uses %(ENV_EO_LOG)s templates, not expanded absolute paths.
+  # Resolve the suffix after that variable so newly added upstream programs are covered.
+  log_paths="$(docker run --rm --entrypoint /bin/bash "$IMAGE" -lc "grep -RhoE '%\\(ENV_EO_LOG\\)s/[^[:space:]]+' /etc/supervisor/conf.d 2>/dev/null || true")"
   while IFS= read -r log_path; do
-    [[ "$log_path" == /var/log/euro-office/documentserver/* ]] || continue
-    install -d -m 0750 "$DATA_DIR/logs/$(dirname "${log_path#/var/log/euro-office/documentserver/}")"
+    relative_path="${log_path#*'%(ENV_EO_LOG)s/'}"
+    [[ "$relative_path" != "$log_path" ]] || continue
+    log_subdir="$(dirname -- "$relative_path")"
+    [[ "$log_subdir" == "." ]] || install -d -m 0750 "$DATA_DIR/logs/$log_subdir"
   done <<< "$log_paths"
   if docker container inspect "$CONTAINER" >/dev/null 2>&1; then
     log "Replacing existing container; configuration and JWT secret are retained."
