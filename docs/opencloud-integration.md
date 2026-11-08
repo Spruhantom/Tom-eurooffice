@@ -53,8 +53,9 @@ bash scripts/configure-opencloud.sh \
   --acme-email admin@example.com
 ```
 
-The script creates or updates the upstream `.env`, sets the Euro-Office
-Compose modules and validates the resulting Compose configuration. It does not
+The script creates or updates the upstream `.env`, selects the Yjs collaboration
+relay plus the Euro-Office/WOPI Compose modules, and validates the resulting
+Compose configuration. Yjs enables real-time co-editing between users. It does not
 start containers unless `--start` is supplied.
 
 Save the generated initial admin password displayed by the script. The JWT
@@ -103,18 +104,67 @@ the ACME email. Ensure both DNS records point to the server and inbound ports
 - The integration remains community-supported and should be treated as
   experimental until real browser-based editing and persistence tests pass.
 
+## 4. Validate a running deployment
+
+After the stack is started and both public HTTPS hostnames resolve, run the
+live smoke test from this repository:
+
+```bash
+bash tests/opencloud-live-smoke.sh \
+  --compose-dir /path/to/opencloud-compose \
+  --opencloud-url https://cloud.example.com \
+  --office-url https://office.example.com
+```
+
+The script checks that the OpenCloud and Euro-Office Compose services are
+running, Euro-Office returns `true` from `/healthcheck`, its
+`/hosting/discovery` endpoint returns a WOPI discovery document, the
+OpenCloud web endpoint responds, and the `/wopi` and `/collaboration` routes
+do not return missing-route or gateway/server errors.
+
+It uses normal TLS certificate verification. Fix DNS, certificates, reverse
+proxy routing or container health issues rather than disabling TLS checks.
+
+## 5. Browser editing and persistence acceptance test
+
+The live smoke test proves service reachability, not that a user can edit and
+save a file. Complete this test in a browser before calling the integration
+production-ready:
+
+1. Sign in to OpenCloud with a normal test user (not the administrator).
+2. Create a new DOCX file in OpenCloud or upload a small test DOCX.
+3. Open the file using the Euro-Office editor from the OpenCloud file menu.
+4. Add a unique marker, for example `TomOS-E2E-2026-11-08-001`, and wait for
+   the editor's save/synchronisation indicator to settle.
+5. Close the editor, wait several seconds, then reopen the same file.
+6. Confirm the marker is still present and the document is not reported as
+   read-only or disconnected.
+7. Download the file from OpenCloud and verify the marker is present in the
+   downloaded DOCX as well.
+8. Repeat with XLSX and PPTX if those formats are in the intended support
+   scope. Test simultaneous editing in two browser sessions if co-editing is
+   required.
+9. Review OpenCloud and Euro-Office logs for WOPI, JWT, storage, or callback
+   errors. Confirm the browser's network panel shows no failed WOPI or
+   collaboration requests.
+
+Record the date, OpenCloud/Euro-Office image versions, browser, test file
+formats, and pass/fail outcome. Do not mark editing/persistence as passed
+unless the close-and-reopen and downloaded-file checks both succeed.
+
 ## Automated checks
 
 Run:
 
 ```bash
-bash -n scripts/configure-opencloud.sh tests/opencloud-config.sh
+bash -n scripts/configure-opencloud.sh tests/opencloud-config.sh tests/opencloud-live-smoke.sh
 bash tests/opencloud-config.sh
-shellcheck --severity=warning scripts/configure-opencloud.sh tests/opencloud-config.sh
+shellcheck --severity=warning scripts/configure-opencloud.sh tests/opencloud-config.sh tests/opencloud-live-smoke.sh
 ```
 
 The configuration test uses a temporary Compose fixture and a Docker CLI stub;
-it does not pull images or modify a real OpenCloud installation.
+it does not pull images or modify a real OpenCloud installation. The live smoke
+test requires an already-running deployment and is not run in ordinary CI.
 
 ## Upstream references
 
