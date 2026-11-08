@@ -1,0 +1,30 @@
+name: Nextcloud integration
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "41 5 * * 1"
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  nextcloud-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install test dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes curl openssl shellcheck
+      - name: Check integration test script
+        run: |
+          bash -n tests/nextcloud-integration.sh
+          shellcheck --severity=warning tests/nextcloud-integration.sh
+      - name: Run Nextcloud integration test
+        run: bash tests/nextcloud-integration.sh
