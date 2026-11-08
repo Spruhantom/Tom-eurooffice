@@ -14,7 +14,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-mkdir -p "$WORK_DIR/documentserver" "$WORK_DIR/private" "$WORK_DIR/logs/adminpanel"
+mkdir -p "$WORK_DIR/documentserver" "$WORK_DIR/private" "$WORK_DIR/logs/adminpanel" "$WORK_DIR/logs/converter"
 echo "smoke-test-persistent-state" > "$WORK_DIR/documentserver/persistence-marker"
 echo "smoke-test-private-state" > "$WORK_DIR/private/persistence-marker"
 echo "smoke-test-log-state" > "$WORK_DIR/logs/persistence-marker"
