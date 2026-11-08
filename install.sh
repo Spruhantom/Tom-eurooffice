@@ -81,6 +81,13 @@ install_server() {
   chmod 0600 "$ENV_FILE"
   log "Pulling official community image: $IMAGE"
   docker pull "$IMAGE"
+  log "Preparing log directories required by the image Supervisor configuration."
+  local log_paths
+  log_paths="$(docker run --rm --entrypoint /bin/bash "$IMAGE" -lc "grep -RhoE '/var/log/euro-office/documentserver/[^[:space:]]+' /etc/supervisor/conf.d 2>/dev/null || true")"
+  while IFS= read -r log_path; do
+    [[ "$log_path" == /var/log/euro-office/documentserver/* ]] || continue
+    install -d -m 0750 "$DATA_DIR/logs/$(dirname "${log_path#/var/log/euro-office/documentserver/}")"
+  done <<< "$log_paths"
   if docker container inspect "$CONTAINER" >/dev/null 2>&1; then
     log "Replacing existing container; configuration and JWT secret are retained."
     docker rm -f "$CONTAINER" >/dev/null
