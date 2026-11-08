@@ -4,9 +4,9 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SCRIPT="$ROOT/scripts/configure-opencloud.sh"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
-mkdir -p "$TMP/compose/weboffice" "$TMP/compose/external-proxy"
+mkdir -p "$TMP/compose/weboffice" "$TMP/compose/yjs" "$TMP/compose/external-proxy"
 touch "$TMP/compose/docker-compose.yml" "$TMP/compose/.env.example"
-touch "$TMP/compose/weboffice/euro-office.yml"
+touch "$TMP/compose/weboffice/euro-office.yml" "$TMP/compose/yjs/yjs.yml"
 touch "$TMP/compose/external-proxy/opencloud.yml" "$TMP/compose/external-proxy/euro-office.yml"
 mkdir -p "$TMP/bin"
 cat > "$TMP/bin/docker" <<'EOF'
@@ -26,7 +26,7 @@ PATH="$TMP/bin:$PATH" bash "$SCRIPT" \
   --compose-dir "$TMP/compose" \
   --opencloud-domain cloud.example.test \
   --office-domain office.example.test
-grep -Fxq 'COMPOSE_FILE=docker-compose.yml:weboffice/euro-office.yml:external-proxy/opencloud.yml:external-proxy/euro-office.yml' "$TMP/compose/.env"
+grep -Fxq 'COMPOSE_FILE=docker-compose.yml:yjs/yjs.yml:weboffice/euro-office.yml:external-proxy/opencloud.yml:external-proxy/euro-office.yml' "$TMP/compose/.env"
 grep -Fxq 'OC_DOMAIN=cloud.example.test' "$TMP/compose/.env"
 grep -Fxq 'EURO_OFFICE_DOMAIN=office.example.test' "$TMP/compose/.env"
 grep -Eq '^EURO_OFFICE_JWT_SECRET=[a-f0-9]{64}$' "$TMP/compose/.env"

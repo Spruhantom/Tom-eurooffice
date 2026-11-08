@@ -93,7 +93,7 @@ if [[ "$PROXY" == traefik ]]; then
     die "--acme-email with a valid address is required for Traefik/Let's Encrypt."
 fi
 
-for required in docker-compose.yml weboffice/euro-office.yml "$PROXY/opencloud.yml" "$PROXY/euro-office.yml" .env.example; do
+for required in docker-compose.yml yjs/yjs.yml weboffice/euro-office.yml "$PROXY/opencloud.yml" "$PROXY/euro-office.yml" .env.example; do
   [[ -f "$COMPOSE_DIR/$required" ]] || die "Missing upstream Compose file: $required. Clone/update https://github.com/opencloud-eu/opencloud-compose."
 done
 command -v docker >/dev/null 2>&1 || die "Docker is required."
@@ -109,7 +109,7 @@ else
   chmod 0600 .env
 fi
 
-COMPOSE_FILES="docker-compose.yml:weboffice/euro-office.yml:$PROXY/opencloud.yml:$PROXY/euro-office.yml"
+COMPOSE_FILES="docker-compose.yml:yjs/yjs.yml:weboffice/euro-office.yml:$PROXY/opencloud.yml:$PROXY/euro-office.yml"
 set_env COMPOSE_FILE "$COMPOSE_FILES" .env
 set_env OC_DOMAIN "$OC_DOMAIN" .env
 set_env EURO_OFFICE_DOMAIN "$OFFICE_DOMAIN" .env
