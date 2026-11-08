@@ -59,7 +59,7 @@ set_env() {
 }
 read_env() {
   local key="$1" file="$2" line
-  line="$(grep -m1 -E "^\${key}=" "$file" 2>/dev/null || true)"
+  line="$(grep -m1 -E "^${key}=" "$file" 2>/dev/null || true)"
   line="${line#*=}"
   line="${line%\"}"; line="${line#\"}"
   line="${line%\'}"; line="${line#\'}"
