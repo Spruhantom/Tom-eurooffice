@@ -2,7 +2,7 @@
 
 A Bash installer for the Euro-Office Document Server community container. Supports Arch Linux (including Omarchy), Ubuntu, Debian and Fedora.
 
-> **Important:** Euro-Office Document Server is an integration component, not a standalone office/storage application. It needs a compatible platform such as OpenCloud or Nextcloud to store and manage documents. The upstream project currently describes its community container as intended for testing and integration. Review upstream documentation and support status before production use.
+> **Important:** Euro-Office Document Server is an integration component, not a standalone office/storage application. It needs a compatible platform such as OpenCloud to store and manage documents. The upstream project currently describes its community container as intended for testing and integration. Review upstream documentation and support status before production use.
 
 ## Install
 
@@ -18,7 +18,7 @@ Choose a different local port:
 curl -fsSL https://raw.githubusercontent.com/Spruhantom/Tom-eurooffice/main/install.sh | sudo bash -s -- --port 8090
 ```
 
-The service is deliberately published on **127.0.0.1** only. Configure a TLS reverse proxy before exposing it remotely. The installer does not configure DNS, TLS, firewall rules, OpenCloud/Nextcloud, or a reverse proxy.
+The service is deliberately published on **127.0.0.1** only. Configure a TLS reverse proxy before exposing it remotely. The installer does not configure DNS, TLS, firewall rules, OpenCloud, or a reverse proxy.
 
 ## Verify
 
