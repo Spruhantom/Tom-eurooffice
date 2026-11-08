@@ -5,6 +5,7 @@ IFS=$'\n\t'
 IMAGE="${EURO_OFFICE_IMAGE:-ghcr.io/euro-office/documentserver:latest}"
 CONTAINER="euro-office-documentserver"
 CONFIG_DIR="/etc/euro-office"
+DATA_DIR="/var/lib/euro-office"
 ENV_FILE="${CONFIG_DIR}/server.env"
 LOG_DIR="/var/log/euro-office"
 LOG_FILE="${LOG_DIR}/installer.log"
@@ -34,6 +35,11 @@ install_docker() {
       fedora) have dnf || die "dnf not found."; dnf install -y moby-engine ;;
     esac
   fi
+  case "$DISTRO" in
+    arch) pacman -S --needed --noconfirm curl ;;
+    debian) apt-get install -y curl ;;
+    fedora) dnf install -y curl ;;
+  esac
   have systemctl || die "systemd is required to manage Docker."
   systemctl enable --now docker || die "Could not start Docker. Check systemctl status docker."
   docker info >/dev/null 2>&1 || die "Docker daemon is unavailable."
@@ -57,6 +63,7 @@ install_server() {
     esac
   fi
   install -d -m 0750 "$CONFIG_DIR"
+  install -d -m 0750 "$DATA_DIR/documentserver" "$DATA_DIR/private" "$DATA_DIR/logs"
   local secret
   if [[ -s "$ENV_FILE" ]] && grep -q '^JWT_SECRET=' "$ENV_FILE"; then
     secret="$(sed -n 's/^JWT_SECRET=//p' "$ENV_FILE" | head -n1)"
@@ -110,8 +117,8 @@ uninstall_server() {
     log "Container is not present."
   fi
   if [[ "$purge" == yes ]]; then
-    rm -rf -- "$CONFIG_DIR"
-    log "Configuration and JWT secret removed."
+    rm -rf -- "$CONFIG_DIR" "$DATA_DIR"
+    log "Configuration, JWT secret and persistent server data removed."
   else
     log "Configuration and JWT secret retained at $ENV_FILE."
     log "Use --purge to delete them."
