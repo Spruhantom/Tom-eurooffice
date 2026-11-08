@@ -1,0 +1,27 @@
+name: Container runtime smoke test
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 4 * * 1"
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  document-server:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install test dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes curl openssl
+      - name: Check test script syntax
+        run: |
+          bash -n tests/container-smoke.sh
+          shellcheck --severity=warning tests/container-smoke.sh
+      - name: Run Document Server smoke test
+        run: bash tests/container-smoke.sh
