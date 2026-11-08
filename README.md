@@ -91,3 +91,23 @@ GitHub Actions runs Bash syntax checks and ShellCheck on pushes and pull request
 - [Official documentation](https://euro-office.github.io/documentation/)
 
 This is an independent community installer and is not affiliated with or endorsed by Euro-Office contributors.
+
+## Nextcloud integration test
+
+The integration workflow starts disposable Nextcloud and Euro-Office containers on an isolated Docker network. It installs and enables the official `eurooffice` Nextcloud connector, configures matching JWT secrets and internal service URLs, checks that Nextcloud can reach the editor API, and runs the connector's native connection/conversion check.
+
+Run the same test locally on a Docker host:
+
+```bash
+bash tests/nextcloud-integration.sh
+```
+
+Optional image overrides:
+
+```bash
+EURO_OFFICE_IMAGE=ghcr.io/euro-office/documentserver:latest \
+NEXTCLOUD_IMAGE=nextcloud:stable-apache \
+bash tests/nextcloud-integration.sh
+```
+
+The test uses temporary containers and removes them when it exits. It validates service-to-service connectivity and the connector's conversion check; it does not replace browser-based testing of interactive editing, co-editing, or save-back in a real deployment.
