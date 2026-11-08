@@ -22,6 +22,13 @@ echo "smoke-test-log-state" > "$WORK_DIR/logs/persistence-marker"
 echo "Pulling $IMAGE"
 docker pull "$IMAGE"
 
+# The image stores several Supervisor log files in nested directories.
+# A bind mount hides the image directories, so recreate them on the host.
+while IFS= read -r log_path; do
+  [[ "$log_path" == /var/log/euro-office/documentserver/* ]] || continue
+  mkdir -p "$WORK_DIR/logs/$(dirname "${log_path#/var/log/euro-office/documentserver/}")"
+done < <(docker run --rm --entrypoint /bin/bash "$IMAGE" -lc "grep -RhoE '/var/log/euro-office/documentserver/[^[:space:]]+' /etc/supervisor/conf.d 2>/dev/null || true")
+
 docker run -d --name "$CONTAINER" --restart=no \
   -p 127.0.0.1::80 \
   -e JWT_ENABLED=true -e "JWT_SECRET=$JWT_SECRET" \
