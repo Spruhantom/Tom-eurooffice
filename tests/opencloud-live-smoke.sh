@@ -54,7 +54,7 @@ docker compose version >/dev/null 2>&1 || fail "Docker Compose v2 is required."
 
 cd "$COMPOSE_DIR"
 running="$(docker compose ps --services --filter status=running)"
-for service in opencloud euro-office; do
+for service in opencloud euro-office yjs; do
   grep -Fxq "$service" <<< "$running" || fail "Compose service '$service' is not running. Check: docker compose ps"
 done
 log "OpenCloud and Euro-Office containers are running."
@@ -90,7 +90,7 @@ log "OpenCloud web endpoint responded (HTTP $cloud_root)."
 
 # Both routes are explicitly provided by the upstream OpenCloud proxy.
 # A successful route response or an auth/method response proves routing;
-# 404 and gateway/server errors are treated as failures.
+# a missing route or gateway/server error is treated as a failure.
 for route in wopi collaboration; do
   status="$(request "${OPENcloud_URL%/}/$route" "$tmp/$route")"
   case "$status" in
