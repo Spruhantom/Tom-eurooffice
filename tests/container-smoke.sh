@@ -24,10 +24,14 @@ docker pull "$IMAGE"
 
 # The image stores several Supervisor log files in nested directories.
 # A bind mount hides the image directories, so recreate them on the host.
+# Supervisor config uses %(ENV_EO_LOG)s templates; parse the suffix instead of
+# searching for an absolute path that is only expanded inside the container.
 while IFS= read -r log_path; do
-  [[ "$log_path" == /var/log/euro-office/documentserver/* ]] || continue
-  mkdir -p "$WORK_DIR/logs/$(dirname "${log_path#/var/log/euro-office/documentserver/}")"
-done < <(docker run --rm --entrypoint /bin/bash "$IMAGE" -lc "grep -RhoE '/var/log/euro-office/documentserver/[^[:space:]]+' /etc/supervisor/conf.d 2>/dev/null || true")
+  relative_path="${log_path#*'%(ENV_EO_LOG)s/'}"
+  [[ "$relative_path" != "$log_path" ]] || continue
+  log_subdir="$(dirname -- "$relative_path")"
+  [[ "$log_subdir" == "." ]] || mkdir -p "$WORK_DIR/logs/$log_subdir"
+done < <(docker run --rm --entrypoint /bin/bash "$IMAGE" -lc "grep -RhoE '%\\(ENV_EO_LOG\\)s/[^[:space:]]+' /etc/supervisor/conf.d 2>/dev/null || true")
 
 docker run -d --name "$CONTAINER" --restart=no \
   -p 127.0.0.1::80 \
