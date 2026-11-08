@@ -30,13 +30,17 @@ install_docker() {
   if ! have docker; then
     log "Installing Docker from distribution repositories."
     case "$DISTRO" in
-      arch) have pacman || die "pacman not found."; pacman -Sy --needed --noconfirm docker ;;
+      arch) have pacman || die "pacman not found."; pacman -Syu --needed --noconfirm docker curl openssl ;;
       debian) have apt-get || die "apt-get not found."; export DEBIAN_FRONTEND=noninteractive; apt-get update; apt-get install -y docker.io ca-certificates curl ;;
       fedora) have dnf || die "dnf not found."; dnf install -y moby-engine ;;
     esac
   fi
   case "$DISTRO" in
-    arch) pacman -S --needed --noconfirm curl ;;
+    arch)
+      if ! have curl || ! have openssl; then
+        pacman -Syu --needed --noconfirm curl openssl
+      fi
+      ;;
     debian) apt-get install -y curl ;;
     fedora) dnf install -y curl ;;
   esac
@@ -57,7 +61,7 @@ install_server() {
   install_docker
   if ! have openssl; then
     case "$DISTRO" in
-      arch) pacman -S --needed --noconfirm openssl ;;
+      arch) pacman -Syu --needed --noconfirm openssl ;;
       debian) apt-get install -y openssl ;;
       fedora) dnf install -y openssl ;;
     esac
@@ -82,9 +86,15 @@ install_server() {
     docker rm -f "$CONTAINER" >/dev/null
   fi
   log "Starting Document Server on TCP port $port."
+  local volume_suffix=""
+  # SELinux hosts need private relabelling for writable bind mounts.
+  [[ "$DISTRO" == fedora ]] && volume_suffix=":Z"
   docker run -d --name "$CONTAINER" --restart unless-stopped \
     --publish "127.0.0.1:$port:80" \
     --env JWT_ENABLED=true --env "JWT_SECRET=$secret" \
+    --volume "$DATA_DIR/documentserver:/var/lib/euro-office/documentserver$volume_suffix" \
+    --volume "$DATA_DIR/private:/var/www/euro-office/Data$volume_suffix" \
+    --volume "$DATA_DIR/logs:/var/log/euro-office/documentserver$volume_suffix" \
     "$IMAGE" >/dev/null
   log "Waiting for HTTP health check."
   local i
