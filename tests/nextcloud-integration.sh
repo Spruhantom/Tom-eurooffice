@@ -87,7 +87,7 @@ docker exec -u www-data "$NEXTCLOUD_CONTAINER" php occ app:enable eurooffice
 
 echo "Configuring matching JWT and internal service URLs."
 docker exec -u www-data "$NEXTCLOUD_CONTAINER" php occ config:app:set eurooffice DocumentServerUrl \
-  --value="http://127.0.0.1:$NEXTCLOUD_PORT/"
+  --value="http://127.0.0.1:$DOCS_PORT/"
 docker exec -u www-data "$NEXTCLOUD_CONTAINER" php occ config:app:set eurooffice DocumentServerInternalUrl \
   --value="http://documentserver/"
 docker exec -u www-data "$NEXTCLOUD_CONTAINER" php occ config:app:set eurooffice StorageUrl \
