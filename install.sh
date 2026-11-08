@@ -2,7 +2,6 @@
 # Euro-Office Document Server installer for Arch/Omarchy, Debian/Ubuntu and Fedora.
 set -Eeuo pipefail
 IFS=$'\n\t'
-APP="euro-office"
 IMAGE="${EURO_OFFICE_IMAGE:-ghcr.io/euro-office/documentserver:latest}"
 CONTAINER="euro-office-documentserver"
 CONFIG_DIR="/etc/euro-office"
@@ -93,10 +92,12 @@ install_server() {
       printf 'Review upstream documentation and community-build support status before production use.\n'
       return 0
     fi
+    if (( i == 60 )); then
+      docker logs --tail 100 "$CONTAINER" 2>&1 | tee -a "$LOG_FILE" || true
+      die "Health check failed after 60 attempts. Inspect docker logs $CONTAINER."
+    fi
     sleep 5
   done
-  docker logs --tail 100 "$CONTAINER" 2>&1 | tee -a "$LOG_FILE" || true
-  die "Health check failed. Inspect docker logs $CONTAINER."
 }
 uninstall_server() {
   local purge="${1:-}"
