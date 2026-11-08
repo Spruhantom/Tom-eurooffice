@@ -12,6 +12,7 @@ JWT_SECRET="$(openssl rand -hex 32)"
 NEXTCLOUD_ADMIN_USER="integration-admin"
 NEXTCLOUD_ADMIN_PASSWORD="$(openssl rand -hex 20)"
 NEXTCLOUD_PORT=""
+DOCS_PORT=""
 
 cleanup() {
   docker logs --tail 100 "$NEXTCLOUD_CONTAINER" 2>/dev/null || true
@@ -47,13 +48,16 @@ docker network create "$NETWORK" >/dev/null
 
 echo "Starting Euro-Office Document Server."
 docker run -d --name "$DOCS_CONTAINER" --network "$NETWORK" \
-  --network-alias documentserver --restart=no \
+  --network-alias documentserver -p 127.0.0.1::80 --restart=no \
   -e JWT_ENABLED=true -e "JWT_SECRET=$JWT_SECRET" \
   "$DOCUMENTSERVER_IMAGE" >/dev/null
 
+DOCS_PORT="$(docker port "$DOCS_CONTAINER" 80/tcp | sed -n 's/.*:\\([0-9][0-9]*\\)$/\\1/p' | head -n1)"
+[[ -n "$DOCS_PORT" ]] || fail "Could not determine Document Server's published port."
+
 echo "Waiting for Document Server health endpoint."
 for attempt in $(seq 1 60); do
-  if docker exec "$DOCS_CONTAINER" curl --fail --silent http://127.0.0.1/healthcheck |
+  if curl --fail --silent "http://127.0.0.1:$DOCS_PORT/healthcheck" |
     grep -qi true; then
     echo "Document Server health check passed."
     break
@@ -63,7 +67,6 @@ for attempt in $(seq 1 60); do
   fi
   sleep 5
 done
-
 echo "Starting Nextcloud."
 docker run -d --name "$NEXTCLOUD_CONTAINER" --network "$NETWORK" \
   --network-alias nextcloud -p 127.0.0.1::80 \
